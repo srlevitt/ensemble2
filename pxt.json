@@ -9,7 +9,7 @@
         "main.blocks",
         "main.ts",
         "README.md",
-        "custom.ts"
+        "Ensemble.ts"
     ],
     "testFiles": [
         "test.ts"
@@ -17,5 +17,5 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "tsprj"
+    "preferredEditor": "blocksprj"
 }
