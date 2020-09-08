@@ -20,18 +20,31 @@ namespace Ensemble
     let started = 0;
     let onReceivedValueHandler: (name: string, value: number) => void;
         
-    function sendId()
+    export let isGateway:boolean = false;
+    
+    function sendPacket(msgType:number, id:number, value:number, name:string)
     {
         let msg = pins.createBuffer(MAX_MESSAGE_LENGTH);
         msg.fill(0);
-        msg.setUint8(POS_MSG_TYPE, MSG_TYPE_DEVICE_ID);
-        msg.setNumber(NumberFormat.Int32LE, POS_DEVICE_ID, deviceId);
-        deviceName = control.deviceName().substr(0,MAX_NAME_LENGTH);
-        for(let i=0; i < MAX_NAME_LENGTH; i++)
+        msg.setUint8(POS_MSG_TYPE, msgType);
+        msg.setNumber(NumberFormat.Int32LE, POS_DEVICE_ID, id);
+        msg.setNumber(NumberFormat.Float32LE, POS_VALUE, value);
+        name = name.substr(0, MAX_NAME_LENGTH);
+        for(let i=0; i < name.length; i++)
         {
-            msg.setUint8(POS_NAME + i, deviceName.charCodeAt(i));
+            msg.setUint8(POS_NAME + i, name.charCodeAt(i));
         }
         radio.sendBuffer(msg);
+        if (isGateway)
+        {
+            serial.writeLine("");
+            serial.writeLine(msgType + "|" + id + "|" + value + "|" + name);
+        }
+    }
+
+    function sendId()
+    {
+        sendPacket(MSG_TYPE_DEVICE_ID, deviceId, 0, deviceName);
     }
 
     control.inBackground(function ()
@@ -48,28 +61,76 @@ namespace Ensemble
 
     radio.onReceivedBuffer(function (buff : Buffer)
     {
-       serial.writeLine(buff.length());
        let msgType = buff.getUint8(POS_MSG_TYPE);
        let devId = buff.getNumber(NumberFormat.Int32LE, POS_DEVICE_ID);
-       let value = buff.getNumber(NumberFormat.Int32LE, POS_VALUE);
+       let value = buff.getNumber(NumberFormat.Float32LE, POS_VALUE);
        let name = "";
        let i = 0;
        let ch = buff.getUint8(POS_NAME + i++);
        while((ch != 0) && (i < MAX_NAME_LENGTH))
        {
-           name = name + String.fromCharCode(ch);
+           let newCh = String.fromCharCode(ch);
+           if (newCh == '|')
+           {
+               newCh = '_';
+           }
+           name = name + newCh;
            ch = buff.getUint8(POS_NAME + i++);
        }
-        serial.writeLine("typ " + msgType + " dev " + devId + " val " + value + " name " + name);
-//        if ((msgType == MSG_TYPE_VALUE_FROM_ENSEMBLE) && (devId == deviceId))
-        if ((msgType == MSG_TYPE_VALUE_TO_ENSEMBLE) && (devId != deviceId))
+
+        switch(msgType)
         {
-            if (onReceivedValueHandler)
-            {
-                onReceivedValueHandler(name, value);        
-            }
-        }        
+            case MSG_TYPE_VALUE_FROM_ENSEMBLE:
+                if (devId == deviceId)
+                {
+                    if (onReceivedValueHandler)
+                    {
+                        onReceivedValueHandler(name, value);        
+                    }
+                }        
+                break;           
+
+            case MSG_TYPE_VALUE_TO_ENSEMBLE:
+            case MSG_TYPE_DEVICE_ID:
+                if (isGateway)
+                {
+                    serial.writeLine("");
+                    serial.writeLine(msgType + "|" + devId + "|" + value + "|" + name);
+                }
+                break;
+        }
     })
+
+    serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () 
+    {
+        if (started && isGateway)
+        {
+            let buff = serial.readLine();
+            let toks = buff.split("|");
+            if (toks.length >= 4)
+            {
+                let msgType = parseInt(toks[0]);
+                if (msgType == MSG_TYPE_VALUE_FROM_ENSEMBLE)
+                {
+                    let devId = parseInt(toks[1]);
+                    let value = parseFloat(toks[2]);
+                    let name = toks[3].trim();
+                    if (devId == deviceId)
+                    {
+                        if (onReceivedValueHandler)
+                        {
+                            onReceivedValueHandler(name, value);        
+                        }
+                    }        
+                    else
+                    {
+                        sendPacket(msgType, devId, value, name);
+                    }
+                }
+            }
+        }
+    })
+
 
    /**
      * Registers code to run when the radio receives a value from Ensemble
@@ -89,17 +150,10 @@ namespace Ensemble
     //% block="send|value %n %v"
     export function sendValue(name:string, value:number)
     {
-        let msg = pins.createBuffer(MAX_MESSAGE_LENGTH);
-        msg.fill(0);
-        msg.setUint8(POS_MSG_TYPE, MSG_TYPE_VALUE_TO_ENSEMBLE);
-        msg.setNumber(NumberFormat.Int32LE, POS_DEVICE_ID, deviceId);
-        msg.setNumber(NumberFormat.Int32LE, POS_VALUE, value);
-        name = name.substr(0, MAX_NAME_LENGTH);
-        for(let i=0; i < name.length; i++)
+        if (started)
         {
-            msg.setUint8(POS_NAME + i, name.charCodeAt(i));
+            sendPacket(MSG_TYPE_VALUE_TO_ENSEMBLE, deviceId, value, name);
         }
-        radio.sendBuffer(msg);
     }
 
     /**
@@ -122,7 +176,7 @@ namespace Ensemble
     //% block="start %n"
     export function start(name:string)
     {
-        deviceName = name.substr(0, MAX_NAME_LENGTH);
+        deviceName = name.substr(0, MAX_NAME_LENGTH).replace("|", "_");
         started = 1;
         radio.setGroup(1)
         radio.setTransmitSerialNumber(true);

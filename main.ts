@@ -10,4 +10,5 @@ Ensemble.onReceivedValue(function (name, value) {
     led.toggle(value, 0)
 })
 let toggleB = 0
+Ensemble.isGateway = true;
 Ensemble.start("my device")
