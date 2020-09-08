@@ -81,7 +81,7 @@ namespace Ensemble
         switch(msgType)
         {
             case MSG_TYPE_VALUE_FROM_ENSEMBLE:
-                if (devId == deviceId)
+                if ((devId == 0) || (devId == deviceId))
                 {
                     if (onReceivedValueHandler)
                     {
@@ -115,14 +115,14 @@ namespace Ensemble
                     let devId = parseInt(toks[1]);
                     let value = parseFloat(toks[2]);
                     let name = toks[3].trim();
-                    if (devId == deviceId)
+                    if ((devId == 0) || (devId == deviceId))
                     {
                         if (onReceivedValueHandler)
                         {
                             onReceivedValueHandler(name, value);        
                         }
                     }        
-                    else
+                    if ((devId == 0) || (devId != deviceId))
                     {
                         sendPacket(msgType, devId, value, name);
                     }
