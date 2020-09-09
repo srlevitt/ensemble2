@@ -11,6 +11,7 @@ namespace Ensemble
     const POS_VALUE = POS_DEVICE_ID + 4;
     const POS_NAME = POS_VALUE + 4;
 
+    const MSG_TYPE_YOU_ARE_GATEWAY = 100;
     const MSG_TYPE_DEVICE_ID = 99;
     const MSG_TYPE_VALUE_TO_ENSEMBLE = 98;
     const MSG_TYPE_VALUE_FROM_ENSEMBLE = 97;
@@ -44,7 +45,14 @@ namespace Ensemble
 
     function sendId()
     {
-        sendPacket(MSG_TYPE_DEVICE_ID, deviceId, 0, deviceName);
+        if (isGateway)
+        {
+            sendPacket(MSG_TYPE_DEVICE_ID, deviceId, 0, "gateway");
+        }
+        else
+        {
+            sendPacket(MSG_TYPE_DEVICE_ID, deviceId, 0, deviceName);
+        }
     }
 
     control.inBackground(function ()
@@ -103,30 +111,36 @@ namespace Ensemble
 
     serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () 
     {
-        if (started && isGateway)
+        let buff = serial.readLine();
+        let toks = buff.split("|");
+        if (toks.length >= 4)
         {
-            let buff = serial.readLine();
-            let toks = buff.split("|");
-            if (toks.length >= 4)
+            let msgType = parseInt(toks[0]);
+            switch (msgType)
             {
-                let msgType = parseInt(toks[0]);
-                if (msgType == MSG_TYPE_VALUE_FROM_ENSEMBLE)
-                {
-                    let devId = parseInt(toks[1]);
-                    let value = parseFloat(toks[2]);
-                    let name = toks[3].trim();
-                    if ((devId == 0) || (devId == deviceId))
+                case MSG_TYPE_YOU_ARE_GATEWAY:
+                    isGateway = true;
+                    break;
+
+                case MSG_TYPE_VALUE_FROM_ENSEMBLE:
+                    if (started && isGateway)
                     {
-                        if (onReceivedValueHandler)
+                        let devId = parseInt(toks[1]);
+                        let value = parseFloat(toks[2]);
+                        let name = toks[3];
+                        if ((devId == 0) || (devId == deviceId))
                         {
-                            onReceivedValueHandler(name, value);        
+                            if (onReceivedValueHandler)
+                            {
+                                onReceivedValueHandler(name, value);        
+                            }
+                        }        
+                        if ((devId == 0) || (devId != deviceId))
+                        {
+                            sendPacket(msgType, devId, value, name);
                         }
-                    }        
-                    if ((devId == 0) || (devId != deviceId))
-                    {
-                        sendPacket(msgType, devId, value, name);
                     }
-                }
+                    break;
             }
         }
     })
@@ -176,9 +190,16 @@ namespace Ensemble
     //% block="start %n"
     export function start(name:string)
     {
-        deviceName = name.substr(0, MAX_NAME_LENGTH).replace("|", "_");
+        if (name.length > 0)
+        {
+            deviceName = name.substr(0, MAX_NAME_LENGTH).replace("|", "_");
+        }
+        else
+        {
+            deviceName = deviceId.toString();
+        }
         started = 1;
-        radio.setGroup(1)
+        radio.setGroup(1);
         radio.setTransmitSerialNumber(true);
         sendId();
     }

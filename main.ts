@@ -12,8 +12,7 @@ Ensemble.onReceivedValue(function (name, value) {
 let P0 = 0
 let newP0 = 0
 let toggleB = 0
-Ensemble.isGateway = true;
-Ensemble.start("my device")
+Ensemble.start("red")
 basic.forever(function () {
     newP0 = pins.digitalReadPin(DigitalPin.P0)
     if (newP0 != P0) {
