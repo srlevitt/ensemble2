@@ -16,7 +16,6 @@ Ensemble.start("red")
 basic.forever(function () {
     newP0 = pins.digitalReadPin(DigitalPin.P0)
     if (newP0 != P0) {
-        led.toggle(0, 0)
         P0 = newP0
         Ensemble.sendValue("P0", P0)
     }
