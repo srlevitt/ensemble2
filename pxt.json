@@ -1,5 +1,5 @@
 {
-    "name": "Ensemble Example",
+    "name": "Apollo Ensemble",
     "description": "",
     "dependencies": {
         "core": "*",
@@ -17,5 +17,5 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "tsprj"
 }
