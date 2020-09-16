@@ -36,18 +36,14 @@ namespace Ensemble
             msg.setUint8(POS_NAME + i, name.charCodeAt(i));
         }
         radio.sendBuffer(msg);
-        if (isGateway)
-        {
-            serial.writeLine("");
-            serial.writeLine(msgType + "|" + id + "|" + value + "|" + name);
-        }
     }
 
     function sendId()
     {
         if (isGateway)
         {
-            sendPacket(MSG_TYPE_DEVICE_ID, deviceId, 0, "gateway");
+            serial.writeLine("");
+            serial.writeLine(MSG_TYPE_DEVICE_ID + "|" + deviceId + "|" + 0 + "|" + "gateway");
         }
         else
         {
@@ -85,7 +81,6 @@ namespace Ensemble
            name = name + newCh;
            ch = buff.getUint8(POS_NAME + i++);
        }
-
         switch(msgType)
         {
             case MSG_TYPE_VALUE_FROM_ENSEMBLE:
@@ -166,7 +161,15 @@ namespace Ensemble
     {
         if (started)
         {
-            sendPacket(MSG_TYPE_VALUE_TO_ENSEMBLE, deviceId, value, name);
+            if (isGateway)
+            {
+                serial.writeLine("");
+                serial.writeLine(MSG_TYPE_VALUE_TO_ENSEMBLE + "|" + deviceId + "|" + value + "|" + name);
+            }
+            else
+            {
+                sendPacket(MSG_TYPE_VALUE_TO_ENSEMBLE, deviceId, value, name);
+            }
         }
     }
 
