@@ -1,5 +1,5 @@
 
-> Open this page at [https://srlevitt.github.io/ensemble2/](https://srlevitt.github.io/ensemble2/)
+> Open this page at [https://github.com/srlevitt/ensemble2/](https://github.com/srlevitt/ensemble2/)
 
 ## Use as Extension
 
