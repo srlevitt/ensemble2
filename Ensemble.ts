@@ -159,7 +159,7 @@ namespace Ensemble
 
     serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () 
     {
-        let buff = serial.readUntil(serial.delimiters(Delimiters.NewLine));//.readLine();
+        let buff = serial.readLine();
         let toks = buff.split("|");
         if (toks.length >= 4)
         {
@@ -167,7 +167,11 @@ namespace Ensemble
             switch (msgType)
             {
                 case MSG_TYPE_YOU_ARE_GATEWAY:
-                    isGateway = true;
+                    if (!isGateway)
+                    {
+                        serial.setRxBufferSize(64);
+                        isGateway = true;
+                    }
                     break;
 
                 case MSG_TYPE_VALUE_FROM_ENSEMBLE:
