@@ -195,7 +195,7 @@ namespace Ensemble
                     break;
                     
                 case MSG_TYPE_IDENTIFY:
-                    led.toggle(3,3);
+                    //led.toggle(3,3);
                     if (started && isGateway)
                     {
                         let devId = parseInt(toks[1]);
