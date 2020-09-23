@@ -18,10 +18,11 @@ namespace Ensemble
     const MSG_TYPE_IDENTIFY = 96;
 
     const IDENTIFY_DELAY = 250;
+    const IDENTIFY_ME = 5;
     
     let deviceName = "";
     let deviceId = control.deviceSerialNumber();
-    let started = 0;
+    let started = 1;
     let onReceivedValueHandler: (name: string, value: number) => void;
     let identify = 0;
     
@@ -58,10 +59,13 @@ namespace Ensemble
     control.inBackground(function ()
     {
         let zz = 0;
+        let list = [];
+
         while(true)
         {
             if (started)
             {
+                //basic.showNumber(identify);
                 if (zz == 0)
                 {
                     sendId();
@@ -70,24 +74,34 @@ namespace Ensemble
                 {
                     zz = 0;
                 }
-                if (identify >= 7)
+                if (identify > 0)
                 {
-                    if (identify == 7)
+                    if (identify == IDENTIFY_ME)
                     {
                         // remember the leds
+                        for(let i = 0; i < 5; i++) {
+                            for(let j = 0; j < 5; j++) {
+                                list[i*5+j] = led.pointBrightness(i, j);
+                            }
+                        }
                     }
-                    if (identify & 1)
+                    if (identify % 2)
                     {
-                        basic.clearScreen();
+                        basic.showIcon(IconNames.Heart);
                     }
                     else
                     {
-                        basic.showIcon(IconNames.Heart);
+                        basic.clearScreen();
                     }
                     identify--;
                     if (identify == 0)
                     {
                         // restore the leds
+                        for(let i = 0; i < 5; i++) {
+                            for(let j = 0; j < 5; j++) {
+                                led.plotBrightness(i, j,list[i*5+j]);
+                            }
+                        }
                     }
                 }
             }
@@ -137,7 +151,7 @@ namespace Ensemble
             case MSG_TYPE_IDENTIFY:
                 if (devId == deviceId)
                 {
-                    identify = 7;
+                    identify = IDENTIFY_ME;
                 }        
                 break;
         }
@@ -145,7 +159,7 @@ namespace Ensemble
 
     serial.onDataReceived(serial.delimiters(Delimiters.NewLine), function () 
     {
-        let buff = serial.readLine();
+        let buff = serial.readUntil(serial.delimiters(Delimiters.NewLine));//.readLine();
         let toks = buff.split("|");
         if (toks.length >= 4)
         {
@@ -184,7 +198,7 @@ namespace Ensemble
                         let name = toks[3];
                         if (devId == deviceId)
                         {
-                            identify = 7;
+                            identify = IDENTIFY_ME;
                         }        
                         else
                         {
