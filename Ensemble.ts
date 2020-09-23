@@ -57,22 +57,19 @@ namespace Ensemble
 
     control.inBackground(function ()
     {
+        let zz = 0;
         while(true)
         {
             if (started)
             {
-                sendId();
-            }
-            pause(5000);
-        }
-    })
-
-    control.inBackground(function ()
-    {
-        while(true)
-        {
-            if (started)
-            {
+                if (zz == 0)
+                {
+                    sendId();
+                }
+                if (++zz >= 10)
+                {
+                    zz = 0;
+                }
                 if (identify >= 7)
                 {
                     if (identify == 7)
