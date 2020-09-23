@@ -17,6 +17,8 @@ namespace Ensemble
     const MSG_TYPE_VALUE_FROM_ENSEMBLE = 97;
     const MSG_TYPE_IDENTIFY = 96;
 
+    const IDENTIFY_DELAY = 250;
+    
     let deviceName = "";
     let deviceId = control.deviceSerialNumber();
     let started = 0;
