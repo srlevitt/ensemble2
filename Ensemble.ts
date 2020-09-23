@@ -22,7 +22,7 @@ namespace Ensemble
     
     let deviceName = "";
     let deviceId = control.deviceSerialNumber();
-    let started = 1;
+    let started = 0;
     let onReceivedValueHandler: (name: string, value: number) => void;
     let identify = 0;
     
