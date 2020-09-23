@@ -23,7 +23,8 @@ namespace Ensemble
     let deviceId = control.deviceSerialNumber();
     let started = 0;
     let onReceivedValueHandler: (name: string, value: number) => void;
-        
+    let identify = 0;
+    
     export let isGateway:boolean = false;
     
     function sendPacket(msgType:number, id:number, value:number, name:string)
@@ -63,6 +64,37 @@ namespace Ensemble
                 sendId();
             }
             pause(5000);
+        }
+    })
+
+    control.inBackground(function ()
+    {
+        while(true)
+        {
+            if (started)
+            {
+                if (identify >= 7)
+                {
+                    if (identify == 7)
+                    {
+                        // remember the leds
+                    }
+                    if (identify & 1)
+                    {
+                        basic.clearScreen();
+                    }
+                    else
+                    {
+                        basic.showIcon(IconNames.Heart);
+                    }
+                    identify--;
+                    if (identify == 0)
+                    {
+                        // restore the leds
+                    }
+                }
+            }
+            pause(IDENTIFY_DELAY);
         }
     })
 
@@ -108,21 +140,7 @@ namespace Ensemble
             case MSG_TYPE_IDENTIFY:
                 if (devId == deviceId)
                 {
-                    basic.showIcon(IconNames.Heart);
-                    pause(IDENTIFY_DELAY);
-                    basic.clearScreen();
-                    pause(IDENTIFY_DELAY);
-                    basic.showIcon(IconNames.Heart);
-                    pause(IDENTIFY_DELAY);
-                    basic.clearScreen();
-                    pause(IDENTIFY_DELAY);
-                    basic.showIcon(IconNames.Heart);
-                    pause(IDENTIFY_DELAY);
-                    basic.clearScreen();
-                    pause(IDENTIFY_DELAY);
-                    basic.showString(name);
-                 //   pause(IDENTIFY_DELAY);
-                 //   basic.clearScreen();
+                    identify = 7;
                 }        
                 break;
         }
@@ -169,21 +187,7 @@ namespace Ensemble
                         let name = toks[3];
                         if (devId == deviceId)
                         {
-                            basic.showIcon(IconNames.Heart);
-                            pause(IDENTIFY_DELAY);
-                            basic.clearScreen();
-                            pause(IDENTIFY_DELAY);
-                            basic.showIcon(IconNames.Heart);
-                            pause(IDENTIFY_DELAY);
-                            basic.clearScreen();
-                            pause(IDENTIFY_DELAY);
-                            basic.showIcon(IconNames.Heart);
-                            pause(IDENTIFY_DELAY);
-                            basic.clearScreen();
-                            pause(IDENTIFY_DELAY);
-                            basic.showString(name);
-                       //     pause(IDENTIFY_DELAY);
-                     //       basic.clearScreen();
+                            identify = 7;
                         }        
                         else
                         {
