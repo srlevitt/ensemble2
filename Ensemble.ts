@@ -15,6 +15,7 @@ namespace Ensemble
     const MSG_TYPE_DEVICE_ID = 99;
     const MSG_TYPE_VALUE_TO_ENSEMBLE = 98;
     const MSG_TYPE_VALUE_FROM_ENSEMBLE = 97;
+    const MSG_TYPE_IDENTIFY = 96;
 
     let deviceName = "";
     let deviceId = control.deviceSerialNumber();
@@ -101,6 +102,27 @@ namespace Ensemble
                     serial.writeLine(msgType + "|" + devId + "|" + value + "|" + name);
                 }
                 break;
+                
+            case MSG_TYPE_IDENTIFY:
+                if (devId == deviceId)
+                {
+                    basic.showIcon(IconNames.Heart);
+                    pause(500);
+                    basic.clearScreen();
+                    pause(500);
+                    basic.showIcon(IconNames.Heart);
+                    pause(500);
+                    basic.clearScreen();
+                    pause(500);
+                    basic.showIcon(IconNames.Heart);
+                    pause(500);
+                    basic.clearScreen();
+                    pause(500);
+                    basic.showString(name);
+                    pause(500);
+                    basic.clearScreen();
+                }        
+                break;
         }
     })
 
@@ -131,6 +153,37 @@ namespace Ensemble
                             }
                         }        
                         if ((devId == 0) || (devId != deviceId))
+                        {
+                            sendPacket(msgType, devId, value, name);
+                        }
+                    }
+                    break;
+                    
+                case MSG_TYPE_IDENTIFY:
+                    if (started && isGateway)
+                    {
+                        let devId = parseInt(toks[1]);
+                        let value = parseFloat(toks[2]);
+                        let name = toks[3];
+                        if (devId == deviceId)
+                        {
+                            basic.showIcon(IconNames.Heart);
+                            pause(500);
+                            basic.clearScreen();
+                            pause(500);
+                            basic.showIcon(IconNames.Heart);
+                            pause(500);
+                            basic.clearScreen();
+                            pause(500);
+                            basic.showIcon(IconNames.Heart);
+                            pause(500);
+                            basic.clearScreen();
+                            pause(500);
+                            basic.showString(name);
+                            pause(500);
+                            basic.clearScreen();
+                        }        
+                        else
                         {
                             sendPacket(msgType, devId, value, name);
                         }
