@@ -107,20 +107,20 @@ namespace Ensemble
                 if (devId == deviceId)
                 {
                     basic.showIcon(IconNames.Heart);
-                    pause(500);
+                    pause(IDENTIFY_DELAY);
                     basic.clearScreen();
-                    pause(500);
+                    pause(IDENTIFY_DELAY);
                     basic.showIcon(IconNames.Heart);
-                    pause(500);
+                    pause(IDENTIFY_DELAY);
                     basic.clearScreen();
-                    pause(500);
+                    pause(IDENTIFY_DELAY);
                     basic.showIcon(IconNames.Heart);
-                    pause(500);
+                    pause(IDENTIFY_DELAY);
                     basic.clearScreen();
-                    pause(500);
+                    pause(IDENTIFY_DELAY);
                     basic.showString(name);
-                    pause(500);
-                    basic.clearScreen();
+                 //   pause(IDENTIFY_DELAY);
+                 //   basic.clearScreen();
                 }        
                 break;
         }
@@ -168,20 +168,20 @@ namespace Ensemble
                         if (devId == deviceId)
                         {
                             basic.showIcon(IconNames.Heart);
-                            pause(500);
+                            pause(IDENTIFY_DELAY);
                             basic.clearScreen();
-                            pause(500);
+                            pause(IDENTIFY_DELAY);
                             basic.showIcon(IconNames.Heart);
-                            pause(500);
+                            pause(IDENTIFY_DELAY);
                             basic.clearScreen();
-                            pause(500);
+                            pause(IDENTIFY_DELAY);
                             basic.showIcon(IconNames.Heart);
-                            pause(500);
+                            pause(IDENTIFY_DELAY);
                             basic.clearScreen();
-                            pause(500);
+                            pause(IDENTIFY_DELAY);
                             basic.showString(name);
-                            pause(500);
-                            basic.clearScreen();
+                       //     pause(IDENTIFY_DELAY);
+                     //       basic.clearScreen();
                         }        
                         else
                         {
